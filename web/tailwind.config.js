@@ -4,7 +4,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        'restore': ['restore', 'sans-serif']
+        'restore': ['restore', 'sans-serif'],
+        'atari': ['atari', 'sans']
       },
     },
   },

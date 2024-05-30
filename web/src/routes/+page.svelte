@@ -1,6 +1,28 @@
-<div class="w-full h-screen">
+<script>
+  import me1 from '../media/images/portraits/me1.png'
+  import { onMount } from 'svelte'
+  let flip = 1
 
-    <div class="z-10 relative">
+  
+  function goSlide1(){
+    slide2.style.display = 'none'
+    slide1.style.display = 'inline'
+  }
+  function goSlide2(){
+    slide2.style.display = ''
+    slide1.style.display = 'none'
+  }
+
+  onMount(() => {
+    const slide2 = document.getElementById('slide2')
+    const slide1 = document.getElementById('slide1')
+  })
+
+</script>
+
+<div id="webpage" class="w-full h-screen">
+
+    <div id="navbar" class="z-10 relative">
       <div class=" bg-zinc-300 w-full h-[90px] shadow-lg flex border-b-[5px] border-zinc-500">
         
         <div class="h-full w-auto flex">
@@ -46,6 +68,9 @@
         
           <div class=" bg-zinc-300 h-full w-[500px] flex-grow content-center">
             <div class="flex justify-end">
+
+              <button on:click={goSlide1}> 1 </button>
+              <button on:click={goSlide2}> 2 </button>
     
               <div class="group">
     
@@ -126,22 +151,68 @@
       </div>
     </div>
 
-   <div id="screen" class="top-[90px] w-full h-full bg-zinc-950">
-      <div id="screen-overlay"></div>
-      <p>testing <br>tesing <br> 123</p>
-      <img src="https://www.w3schools.com/images/picture.jpg" alt="Mountain">
+   <div id="screen" class="top-[90px] w-full h-full bg-zinc-950 text-white">
+      <div id="screen-overlay" class="animate-pulse"></div>
+
+      <div id="screen-content" class="h-screen flex items-center justify-center">
+
+        <div id="slide1" class="absolute hidden w-[75%] h-[50%] text-center translate-y-[-200px] leading-[250px]">
+          <h1 class="text-[250px] font-restore ml-[10px] bg-gradient-to-br from-blue-700 via-sky-500 to-green-500 bg-clip-text text-transparent">Vann</h1>
+          <p class="text-[250px] font-restore ml-[10px] text-slate-400">x</p>
+          <p class="text-[150px] font-restore ml-[10px] text-slate-400">DEVELOPMENT</p>
+          <div id="downarrow" class="flex justify-center bottom-10">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class=" animate-bounce duration-200 size-20 content-center text-emerald-500">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 5.25 7.5 7.5 7.5-7.5m-15 6 7.5 7.5 7.5-7.5" />
+            </svg>
+          </div>
+
+          
+        </div>
+
+        <div id="slide2" class="absolute w-[55%] h-[50%] text-center translate-y-[-120px] flex rounded-lg">
+          <div class=" w-[40%] h-full flex items-center">
+            <div>
+              <img src="{me1}" alt="portrait of me, Vann" class="rounded-[40px]">
+            </div>
+          </div>
+          <div class=" w-[60%] h-full text-left">
+            <div class="m-[50px] mt-[80px]">
+              <h1 class=" text-[70px] font-bold"> Aloha!</h1>
+              <p class=" text-[25px]">
+                Im a 16 year old student from Hawaii,
+                <br>
+                in 2023 I stumbled into the world of web development and I havent looked back since.
+                <br>
+                When Im not surfing or hanging around with friends, im coming up with interesting problems to solve with creative website designs
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div id="slide3" class="absolute hidden">
+
+        </div>
+
+        <div id="slide4" class="absolute hidden">
+
+        </div>
+        
+      </div>
     </div>
+
 </div>
 
 <style lang="postcss">
+
 #screen-overlay {
   background-image:url("https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Dissolve_Noise_Texture.png");
   width: 300%;
   height: 300%;
-  opacity: 0.05;
+  opacity: 0.1;
   position: fixed;
   animation: noiseMove 8s steps(10) infinite;
   z-index: 9;
+  pointer-events: none;
 }
 
 @keyframes noiseMove {

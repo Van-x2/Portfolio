@@ -1,22 +1,66 @@
 <script>
   import me1 from '../media/images/portraits/me1.png'
   import { onMount } from 'svelte'
-  let flip = 1
+  let canHandleEvent = true
+  let currentslide = 1
+
+  function switchPage(num, importSlides) {
+      let slides = importSlides
+      for (const slide of slides) {
+        if(!(slide.classList.contains('hidden'))) {
+          slide.classList.toggle('hidden')
+        }
+      }
+
+      (eval('slide' + num)).classList.toggle('hidden')
+    }
+
+    function handleWheel(event) {
+      let slides = [slide1, slide2, slide3, slide4]
+
+
+      if (canHandleEvent) {
+        if (event.deltaY < 0) {
+          console.log('up')
+          if (currentslide == 1) {
+            currentslide = currentslide - 0
+          }
+          else {
+            currentslide = currentslide - 1
+          }
+        }
+        if (event.deltaY > 0) {
+          console.log('down')
+          if(currentslide == slides.length) {
+            currentslide = currentslide + 0
+          }
+          else {
+            currentslide = currentslide + 1
+          }
+        }
+        canHandleEvent = false
+      }
+      console.log(currentslide)
+
+      setTimeout(() => {canHandleEvent = true}, 1000)
+
+      switchPage(currentslide, slides)
+      }
+
+
 
   
-  function goSlide1(){
-    slide2.style.display = 'none'
-    slide1.style.display = 'inline'
-  }
-  function goSlide2(){
-    slide2.style.display = ''
-    slide1.style.display = 'none'
-  }
 
   onMount(() => {
-    const slide2 = document.getElementById('slide2')
     const slide1 = document.getElementById('slide1')
+    const slide2 = document.getElementById('slide2')
+    const slide3 = document.getElementById('slide3')
+    const slide4 = document.getElementById('slide4')
+    const overlay = document.getElementById('overlay')
+
+    window.addEventListener('wheel', handleWheel);
   })
+ 
 
 </script>
 
@@ -25,7 +69,7 @@
     <div id="navbar" class="z-10 relative">
       <div class=" bg-zinc-300 w-full h-[90px] shadow-lg flex border-b-[5px] border-zinc-500">
         
-        <div class="h-full w-auto flex">
+        <div id="nav-group-1" class="h-full w-auto flex">
     
             <div class="w-[50px] h-[50px] bg-zinc-200 rounded-full m-5 shadow-lg flex">
                 <button class="content-center">
@@ -66,11 +110,8 @@
       
         </div>
         
-          <div class=" bg-zinc-300 h-full w-[500px] flex-grow content-center">
+          <div id="nav-group-2" class=" bg-zinc-300 h-full w-[500px] flex-grow content-center">
             <div class="flex justify-end">
-
-              <button on:click={goSlide1}> 1 </button>
-              <button on:click={goSlide2}> 2 </button>
     
               <div class="group">
     
@@ -136,7 +177,7 @@
             </div>
           </div>
         
-          <div class="  h-full w-[250px] flex-none flex">
+          <div id="nav-group-3" class="  h-full w-[250px] flex-none flex">
             <div class="w-full h-full flex">
               
                 <p class=" text-zinc-800 font-restore ml-12 text-[40px] content-center">
@@ -152,15 +193,15 @@
     </div>
 
    <div id="screen" class="top-[90px] w-full h-full bg-zinc-950 text-white">
-      <div id="screen-overlay" class="animate-pulse"></div>
+      <div id="overlay" class="screen-overlay"></div>
 
       <div id="screen-content" class="h-screen flex items-center justify-center">
 
-        <div id="slide1" class="absolute hidden w-[75%] h-[50%] text-center translate-y-[-200px] leading-[250px]">
+        <div id="slide1" class="absolute w-[75%] h-[50%] text-center translate-y-[-200px] leading-[250px]">
           <h1 class="text-[250px] font-restore ml-[10px] bg-gradient-to-br from-blue-700 via-sky-500 to-green-500 bg-clip-text text-transparent">Vann</h1>
           <p class="text-[250px] font-restore ml-[10px] text-slate-400">x</p>
           <p class="text-[150px] font-restore ml-[10px] text-slate-400">DEVELOPMENT</p>
-          <div id="downarrow" class="flex justify-center bottom-10">
+          <div id="downarrow" class="flex justify-center  ">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class=" animate-bounce duration-200 size-20 content-center text-emerald-500">
               <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 5.25 7.5 7.5 7.5-7.5m-15 6 7.5 7.5 7.5-7.5" />
             </svg>
@@ -169,32 +210,35 @@
           
         </div>
 
-        <div id="slide2" class="absolute w-[55%] h-[50%] text-center translate-y-[-120px] flex rounded-lg">
+        <div id="slide2" class="absolute hidden w-[55%] h-[50%] text-center translate-y-[-120px] flex rounded-lg">
           <div class=" w-[40%] h-full flex items-center">
             <div>
               <img src="{me1}" alt="portrait of me, Vann" class="rounded-[40px]">
             </div>
           </div>
-          <div class=" w-[60%] h-full text-left">
+          <div class=" w-[60%] h-full text-left flex items-center">
             <div class="m-[50px] mt-[80px]">
-              <h1 class=" text-[70px] font-bold"> Aloha!</h1>
-              <p class=" text-[25px]">
+                <h1 class=" text-[70px] font-bold"> Aloha!</h1>
+              <p class=" text-[20px]">
                 Im a 16 year old student from Hawaii,
                 <br>
                 in 2023 I stumbled into the world of web development and I havent looked back since.
                 <br>
-                When Im not surfing or hanging around with friends, im coming up with interesting problems to solve with creative website designs
+                When Im not surfing or hanging around with friends, 
+                im coming up with interesting problems to solve with creative website designs.
+                <br>
+                blah blah blah, I ramble on...
               </p>
             </div>
           </div>
         </div>
 
         <div id="slide3" class="absolute hidden">
-
+          Slide3
         </div>
 
         <div id="slide4" class="absolute hidden">
-
+          Slide4
         </div>
         
       </div>
@@ -204,7 +248,7 @@
 
 <style lang="postcss">
 
-#screen-overlay {
+.screen-overlay {
   background-image:url("https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Dissolve_Noise_Texture.png");
   width: 300%;
   height: 300%;
@@ -248,5 +292,14 @@
   100%{
     transform:translate(-15%,-20%)
   }
+}
+
+@keyframes rotate {
+from {
+  rotate: 0;
+}
+to {
+  rotate: 180;
+}
 }
 </style>

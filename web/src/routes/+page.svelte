@@ -1,64 +1,112 @@
 <script>
+  //imports & defines inital variables
   import me1 from '../media/images/portraits/me1.png'
   import { onMount } from 'svelte'
   let canHandleEvent = true
-  let currentslide = 1
+  let currentSlide = 3
 
+  //Function to switch slide
   function switchPage(num, importSlides) {
       let slides = importSlides
+
+      //Iterates through 'slides' list defined above
       for (const slide of slides) {
+
+        //checks if the current slide doesnt have the 'hidden' class for TailwindCSS
         if(!(slide.classList.contains('hidden'))) {
+          //adds the hidden tag to the current slide
           slide.classList.toggle('hidden')
         }
       }
 
+      //At this point, all slides have the 'hidden' tag
+
+      //finally, toggles 'hidden' tag for the requested slide, making it visible again
       (eval('slide' + num)).classList.toggle('hidden')
     }
 
-    function handleWheel(event) {
+  //Function that runs whenever the 'wheel' listener detects the scroll wheel being usued
+  function handleWheel(event) {
       let slides = [slide1, slide2, slide3, slide4]
 
-
+      //checks if the canHandleEvent variable is set to true
       if (canHandleEvent) {
+        //if so, detect the scroll direction
+
+        //if scroll distance is negative AKA going up
         if (event.deltaY < 0) {
-          console.log('up')
-          if (currentslide == 1) {
-            currentslide = currentslide - 0
-          }
-          else {
-            currentslide = currentslide - 1
+
+          //checks if the currentSlide is anything other than 1 (the first slide)
+          if (!(currentSlide == 1)) {
+            //if so, increment the currentSlide var by -1 (going to the previous slide)
+            currentSlide = currentSlide - 1
           }
         }
+
+        //if scroll distance is positive AKA going down
         if (event.deltaY > 0) {
-          console.log('down')
-          if(currentslide == slides.length) {
-            currentslide = currentslide + 0
-          }
-          else {
-            currentslide = currentslide + 1
+
+          //checks if currentSlide var is anything other than the last slide
+          if(!(currentSlide == slides.length)) {
+            //if so, increment the currentSlide var by +1 (going to the next slide)
+            currentSlide = currentSlide + 1
           }
         }
+
+        //sets canHandleEvent to false so that currentSlide cannot be changed until canHandleEvent is reset
         canHandleEvent = false
       }
-      console.log(currentslide)
 
+      //waits 1 sec before changing canHandlelEvent back to true (so that we are not overloaoded with slide changes)
       setTimeout(() => {canHandleEvent = true}, 1000)
 
-      switchPage(currentslide, slides)
+      //finally, calls switchPage to switch to the currentSlide
+      switchPage(currentSlide, slides)
+    }
+
+  function handleKeyDown(event) {
+    let slides = [slide1, slide2, slide3, slide4]
+
+    //gets the pressed key
+    let key = event.key
+
+    //checks if the key pressed was the up arrow key
+    if(key == 'ArrowUp') {
+      
+      if (!(currentSlide == 1)) {
+        //if so, increment the currentSlide var by -1 (going to the previous slide)
+        currentSlide = currentSlide - 1
       }
+    }
 
+    //checks if the key pressed was the down arrow key
+    if(key == 'ArrowDown') {
 
-
+      if (!(currentSlide == slides.length)) {
+        //if so, increment the currentSlide var by +1 (going to the previous slide)
+        currentSlide = currentSlide + 1
+      }
+    }
+    switchPage(currentSlide, slides)
+  }
   
-
+  //Runs once the DOM is fully loaded
   onMount(() => {
+
+    //imports the slides from the doc into JS object to be used in the script
     const slide1 = document.getElementById('slide1')
     const slide2 = document.getElementById('slide2')
     const slide3 = document.getElementById('slide3')
     const slide4 = document.getElementById('slide4')
-    const overlay = document.getElementById('overlay')
 
+    let slides = [slide1, slide2, slide3, slide4]
+
+    //Defines scroll wheel listener
     window.addEventListener('wheel', handleWheel);
+
+    //Defines arrow key listener
+    window.addEventListener('keydown', handleKeyDown)
+    switchPage(currentSlide, slides)
   })
  
 
@@ -66,7 +114,7 @@
 
 <div id="webpage" class="w-full h-screen">
 
-    <div id="navbar" class="z-10 relative">
+  <div id="navbar" class="z-10 relative">
       <div class=" bg-zinc-300 w-full h-[90px] shadow-lg flex border-b-[5px] border-zinc-500">
         
         <div id="nav-group-1" class="h-full w-auto flex">
@@ -190,14 +238,15 @@
           </div>
     
       </div>
-    </div>
+  </div>
 
-   <div id="screen" class="top-[90px] w-full h-full bg-zinc-950 text-white">
+  <div id="screen" class="top-[90px] w-full h-full bg-zinc-950 text-white">
+
       <div id="overlay" class="screen-overlay"></div>
 
       <div id="screen-content" class="h-screen flex items-center justify-center">
 
-        <div id="slide1" class="absolute w-[75%] h-[50%] text-center translate-y-[-200px] leading-[250px]">
+        <div id="slide1" class="absolute hidden w-[75%] h-[50%] text-center translate-y-[-200px] leading-[250px]">
           <h1 class="text-[250px] font-restore ml-[10px] bg-gradient-to-br from-blue-700 via-sky-500 to-green-500 bg-clip-text text-transparent">Vann</h1>
           <p class="text-[250px] font-restore ml-[10px] text-slate-400">x</p>
           <p class="text-[150px] font-restore ml-[10px] text-slate-400">DEVELOPMENT</p>
@@ -233,8 +282,15 @@
           </div>
         </div>
 
-        <div id="slide3" class="absolute hidden">
-          Slide3
+        <div id="slide3" class="absolute border-2 border-pink-400 w-[50%] h-[65%] translate-y-[-70px]">
+          <div class="w-full h-[25%]  text-center">
+            <p class="p-8 text-[70px]">My Technical Pallete</p>
+          </div>
+          <div class="w-full h-[75%]">
+            <div class="w-full h-[33%] bg-sky-300"></div>
+            <div class="w-full h-[33%] bg-sky-400"></div>
+            <div class="w-full h-[33%] bg-sky-500"></div>
+          </div>  
         </div>
 
         <div id="slide4" class="absolute hidden">
@@ -242,7 +298,8 @@
         </div>
         
       </div>
-    </div>
+
+  </div>
 
 </div>
 

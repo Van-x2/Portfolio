@@ -27,6 +27,7 @@
 		"@threlte/core": "^7.3.1",
 		"@threlte/extras": "^8.11.4",
 		"@threlte/theatre": "^2.1.8",
+		"@vercel/speed-insights": "^1.0.12",
 		"three": "^0.166.1"
 	}
 }

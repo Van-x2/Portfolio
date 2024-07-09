@@ -1,4 +1,4 @@
-<script>
+5<script>
     import { T, useTask } from '@threlte/core'
     import { interactivity } from '@threlte/extras'
     import { spring } from 'svelte/motion'
@@ -87,7 +87,7 @@ $: if ($surfBoard) {
     });
     }
 
-    setTimeout(()=>{boardLoad()}, 2000)
+    setTimeout(()=>{boardLoad()}, 5000)
 </script>
 
 <T.OrthographicCamera 

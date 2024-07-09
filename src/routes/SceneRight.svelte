@@ -62,7 +62,7 @@
     });
     }
 
-    setTimeout(()=>{remoteLoad()}, 2000)
+    setTimeout(()=>{remoteLoad()}, 5000)
 </script>
 
 <T.OrthographicCamera 

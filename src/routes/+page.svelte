@@ -255,8 +255,8 @@
               <div class="w-full h-[30%] flex items-end justify-center">
                 <div class="w-[80%] h-[80%]  text-center pt-10 px-8 ">
                   <p>
-                    I acquire new skills and expertise wherever my newest projects take me, 
-                    so my technical arsenal is ever-growing.
+                    I acquire new skills and expertise wherever my newest projects take me,
+                    however these are the tools I am most familar with.
                     <br>
                   </p>
                   <p>
@@ -370,7 +370,7 @@
                       <br>
                       Tech Partners Hawaii
                       <br>
-                      2022 -> 202X
+                      2022 -> present
                     </div>
   
                   </div>

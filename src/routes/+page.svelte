@@ -137,7 +137,7 @@
         document.getElementById('buttonOverlay3'),
         document.getElementById('buttonOverlay4'),
       ];
-      cycleMePhotos();
+      //cycleMePhotos();
       document.addEventListener
     });
   </script>

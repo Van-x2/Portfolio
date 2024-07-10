@@ -70,7 +70,6 @@
     }
 
     DefaultLoadingManager.onLoad = function ( ) {
-	console.log( 'Loading Controller Complete!');
     finalLoaded.set(true)
 };
 

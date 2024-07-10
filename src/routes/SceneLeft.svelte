@@ -4,11 +4,15 @@
     import { spring } from 'svelte/motion'
     import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
     import { useLoader } from '@threlte/core'
-    import { BoxGeometry, MeshBasicMaterial, EdgesGeometry, LineSegments, LineBasicMaterial, MeshPhongMaterial } from 'three'
+    import { BoxGeometry, MeshBasicMaterial, EdgesGeometry, LineSegments, LineBasicMaterial, MeshPhongMaterial, DefaultLoadingManager } from 'three'
     import { createEventDispatcher } from 'svelte'
+    import { finalLoaded } from '../stores/loading.js'
     const dispatch = createEventDispatcher()
 
     const surfBoard = useLoader(GLTFLoader).load('https://cdn.tinyglb.com/models/f4cedb874eb449ce9687c5ab27faddc9.glb')
+
+
+    
 
     interactivity()
 
@@ -18,6 +22,8 @@
     let boardPosX = spring(-1000)
     let boardPosY = spring(0)
     let boardRotationTemp = 0
+
+    let allLoaded = false
 
 
     useTask((delta)=>{
@@ -87,7 +93,13 @@ $: if ($surfBoard) {
     });
     }
 
-    setTimeout(()=>{boardLoad()}, 5000)
+
+    finalLoaded.subscribe((value) => {
+        if (value == true) {
+            setTimeout(()=>{boardLoad()}, 500)
+        }
+    })
+
 </script>
 
 <T.OrthographicCamera 

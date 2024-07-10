@@ -24,6 +24,7 @@
     let remotePosY = spring(0)
     let remoteRotationTemp = 0
 
+    let canBeHovered
 
 
     useTask((delta)=>{
@@ -77,7 +78,10 @@
 
     finalLoaded.subscribe((value) => {
         if (value == true) {
-            setTimeout(()=>{remoteLoad()}, 500)
+            setTimeout(()=>{
+                remoteLoad()
+                canBeHovered = true
+            }, 500)
         }
     })
 
@@ -99,12 +103,16 @@
     visible={false}
     
     on:pointerenter={()=> {
-    remoteHover()
-    canRemoteRotate = false
+        if(canBeHovered) {
+            remoteHover()
+            canRemoteRotate = false
+        }
         }}
     on:pointerleave={()=> {
-    canRemoteRotate = true
-    remoteUnHover()
+        if(canBeHovered) {
+            canRemoteRotate = true
+            remoteUnHover()
+        }
         }}
 >
     <T.BoxGeometry args={[4,1.5,1]}/>

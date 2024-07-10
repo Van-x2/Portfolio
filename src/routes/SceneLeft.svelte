@@ -23,6 +23,8 @@
     let boardPosY = spring(0)
     let boardRotationTemp = 0
 
+    let canBeHovered = false
+
     let allLoaded = false
 
 
@@ -57,33 +59,6 @@
     }
     
 
-    // Wait for the model to load and then set materials
-/*
-    $: if ($surfBoard) {
-    $surfBoard.scene.traverse((child) => {
-        if (child.isMesh) {
-            // Set the mesh material
-            child.material = new MeshBasicMaterial({ color: 'white', wireframe: false });
-
-            child.visible = false;
-
-            // Create edges geometry
-            const edges = new EdgesGeometry(child.geometry);
-
-            // Create line segments with the edges geometry and a basic line material
-            const line = new LineSegments(edges, new LineBasicMaterial({ color: "white" }));
-
-            // Position the line segments to match the original mesh
-            line.position.copy(child.position);
-            line.rotation.copy(child.rotation);
-            line.scale.copy(child.scale);
-
-            // Add the line segments to the scene
-            $surfBoard.scene.add(line);
-        }
-    });
-}
-*/
 
 $: if ($surfBoard) {
     $surfBoard.scene.traverse((child) => {
@@ -96,7 +71,10 @@ $: if ($surfBoard) {
 
     finalLoaded.subscribe((value) => {
         if (value == true) {
-            setTimeout(()=>{boardLoad()}, 500)
+            setTimeout(()=>{
+                boardLoad()
+                canBeHovered = true
+            }, 500)
         }
     })
 
@@ -116,12 +94,16 @@ $: if ($surfBoard) {
     visible={false}
     
     on:pointerenter={()=> {
-    boardHover()
-    canBoardRotate = false
+        if(canBeHovered) {
+        boardHover()
+        canBoardRotate = false
+        }
         }}
     on:pointerleave={()=> {
-    canBoardRotate = true
-    boardUnHover()
+        if(canBeHovered) {
+        canBoardRotate = true
+        boardUnHover()
+        }
         }}
 >
     <T.BoxGeometry args={[4,1.2,1]}/>

@@ -1,16 +1,25 @@
 <script>
-    //Threlte Imports
-    import { Canvas } from '@threlte/core'
-    import SceneLeft from './SceneLeft.svelte'
-  
-    import { onMount } from 'svelte';
+    //Media Imports
     import mePhoto1 from '../media/images/mePhoto1.png';
     import mePhoto2 from '../media/images/mePhoto2.jpg';
     import KSMparking from '../media/images/KSMparking.jpg';
     import PDFconvert from '../media/images/PDFconvert.jpg';
-      import SceneRight from './SceneRight.svelte';
-    
-    
+
+    //Threlte Imports
+    import { Canvas } from '@threlte/core'
+    import SceneLeft from './SceneLeft.svelte'
+    import SceneRight from './SceneRight.svelte';
+  
+    import { onMount } from 'svelte';
+    import {finalLoaded} from '../stores/loading.js'
+
+    let finalLoadedLocal
+
+
+  finalLoaded.subscribe((value)=> {
+    finalLoadedLocal = value
+  })
+
     let currentMePhoto = 1;
     let alertText;
     let holoTextLeft
@@ -128,11 +137,13 @@
         document.getElementById('buttonOverlay3'),
         document.getElementById('buttonOverlay4'),
       ];
-      cycleMePhotos();
+      //cycleMePhotos();
       document.addEventListener
     });
   </script>
   
+
+
   <div id="content-container" class="w-screen h-screen bg-slate-900 text-white flex text-[20px] font-gemeli font-thin">
   
     <div id="left-group" class="h-full w-[27%] ">
@@ -244,8 +255,8 @@
               <div class="w-full h-[30%] flex items-end justify-center">
                 <div class="w-[80%] h-[80%]  text-center pt-10 px-8 ">
                   <p>
-                    I acquire new skills and expertise wherever my newest projects take me, 
-                    so my technical arsenal is ever-growing.
+                    I acquire new skills and expertise wherever my newest projects take me,
+                    however these are the tools I am most familar with.
                     <br>
                   </p>
                   <p>
@@ -359,7 +370,7 @@
                       <br>
                       Tech Partners Hawaii
                       <br>
-                      2022 -> 202X
+                      2022 -> present
                     </div>
   
                   </div>
@@ -536,7 +547,7 @@
         </div>
         <div class=" absolute h-[80%] pointer-events-none">
           <div class="w-full h-[50%] flex items-center translate-x-6">
-            <p id="holoTextRight" class="opacity-0 transition duration-500 italic -translate-x-12">
+            <p id="holoTextRight" class="opacity-0 transition duration-500 italic -translate-x-12 hover:opacity-100">
               I am also an avid gamer, currently
               <br>
               playing & recommend: 

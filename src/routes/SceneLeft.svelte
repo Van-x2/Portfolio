@@ -1,14 +1,18 @@
-<script>
+5<script>
     import { T, useTask } from '@threlte/core'
     import { interactivity } from '@threlte/extras'
     import { spring } from 'svelte/motion'
     import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
     import { useLoader } from '@threlte/core'
-    import { BoxGeometry, MeshBasicMaterial, EdgesGeometry, LineSegments, LineBasicMaterial, MeshPhongMaterial } from 'three'
+    import { BoxGeometry, MeshBasicMaterial, EdgesGeometry, LineSegments, LineBasicMaterial, MeshPhongMaterial, DefaultLoadingManager } from 'three'
     import { createEventDispatcher } from 'svelte'
+    import { finalLoaded } from '../stores/loading.js'
     const dispatch = createEventDispatcher()
 
     const surfBoard = useLoader(GLTFLoader).load('https://cdn.tinyglb.com/models/f4cedb874eb449ce9687c5ab27faddc9.glb')
+
+
+    
 
     interactivity()
 
@@ -18,6 +22,10 @@
     let boardPosX = spring(-1000)
     let boardPosY = spring(0)
     let boardRotationTemp = 0
+
+    let canBeHovered = false
+
+    let allLoaded = false
 
 
     useTask((delta)=>{
@@ -51,33 +59,6 @@
     }
     
 
-    // Wait for the model to load and then set materials
-/*
-    $: if ($surfBoard) {
-    $surfBoard.scene.traverse((child) => {
-        if (child.isMesh) {
-            // Set the mesh material
-            child.material = new MeshBasicMaterial({ color: 'white', wireframe: false });
-
-            child.visible = false;
-
-            // Create edges geometry
-            const edges = new EdgesGeometry(child.geometry);
-
-            // Create line segments with the edges geometry and a basic line material
-            const line = new LineSegments(edges, new LineBasicMaterial({ color: "white" }));
-
-            // Position the line segments to match the original mesh
-            line.position.copy(child.position);
-            line.rotation.copy(child.rotation);
-            line.scale.copy(child.scale);
-
-            // Add the line segments to the scene
-            $surfBoard.scene.add(line);
-        }
-    });
-}
-*/
 
 $: if ($surfBoard) {
     $surfBoard.scene.traverse((child) => {
@@ -87,7 +68,16 @@ $: if ($surfBoard) {
     });
     }
 
-    setTimeout(()=>{boardLoad()}, 2000)
+
+    finalLoaded.subscribe((value) => {
+        if (value == true) {
+            setTimeout(()=>{
+                boardLoad()
+                canBeHovered = true
+            }, 500)
+        }
+    })
+
 </script>
 
 <T.OrthographicCamera 
@@ -104,12 +94,16 @@ $: if ($surfBoard) {
     visible={false}
     
     on:pointerenter={()=> {
-    boardHover()
-    canBoardRotate = false
+        if(canBeHovered) {
+        boardHover()
+        canBoardRotate = false
+        }
         }}
     on:pointerleave={()=> {
-    canBoardRotate = true
-    boardUnHover()
+        if(canBeHovered) {
+        canBoardRotate = true
+        boardUnHover()
+        }
         }}
 >
     <T.BoxGeometry args={[4,1.2,1]}/>

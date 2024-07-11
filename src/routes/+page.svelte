@@ -9,25 +9,30 @@
     import { Canvas } from '@threlte/core'
     import SceneLeft from './SceneLeft.svelte'
     import SceneRight from './SceneRight.svelte';
-  
+
+    //Svelte Imports
     import { onMount } from 'svelte';
+
+    //Store Import
     import {finalLoaded} from '../stores/loading.js'
 
-    let finalLoadedLocal
 
+    //Defines usefull variables
 
-  finalLoaded.subscribe((value)=> {
-    finalLoadedLocal = value
-  })
-
+    //Used in portrait switching function
     let currentMePhoto = 1;
+    
+    //Used for element manipulation
     let alertText;
     let holoTextLeft
     let photoElements = [];
     let screenElements = [];
     let buttonOverlays = [];
+
+    //Used to take the local place of the store
+    let finalLoadedLocal
   
-  
+    //Controlls the opacity of the text used with the controller
     function remoteHover() {
     holoTextRight.classList.remove('opacity-0')
     holoTextRight.classList.add('opacity-100')
@@ -36,7 +41,8 @@
     holoTextRight.classList.remove('opacity-100')
     holoTextRight.classList.add('opacity-0')
     }
-  
+    
+    //Controlls the opacity of the text used with the surfboard
     function boardHover() {
     holoTextLeft.classList.remove('opacity-0')
     holoTextLeft.classList.add('opacity-100')
@@ -45,14 +51,15 @@
       holoTextLeft.classList.add('opacity-0')
       holoTextLeft.classList.remove('opacity-100')
     }
-  
+
+    //Copies my email and toggles the opacity of the notification to show it, then hide it after 2 sec
     function emailPressed() {
       navigator.clipboard.writeText('vannxdevelopment@gmail.com');
       alertText.textContent = 'Email copied to clipboard';
       alertText.classList.add('opacity-100');
       setTimeout(() => { alertText.classList.remove('opacity-100'); }, 2000);
     }
-  
+    //Copies my phone and toggles the opacity of the notification to show it, then hide it after 2 sec
     function phonePressed() {
       alertText.classList.remove('opacity-100');
       alertText.classList.add('opacity-0');
@@ -61,36 +68,36 @@
       alertText.classList.add('opacity-100');
       setTimeout(() => { alertText.classList.remove('opacity-100'); }, 2000);
     }
-  
+    
+    //toggles opacity of notification in skills page
     function techStackHovered() {
       alertText.classList.remove('opacity-100');
       alertText.classList.add('opacity-0');
       alertText.textContent = 'My current tech stack';
       alertText.classList.add('opacity-100');
     }
-  
     function techStackUnHovered() {
       alertText.classList.remove('opacity-100');
     }
-  
     function otherHovered() {
       alertText.classList.remove('opacity-100');
       alertText.classList.add('opacity-0');
       alertText.textContent = 'Some other tech that I use';
       alertText.classList.add('opacity-100');
     }
-  
     function otherUnHovered() {
       alertText.classList.remove('opacity-100');
     }
-  
+    
+    //Switches photo to given (num)
     function alternateMePhotos(num) {
       for (const photo of photoElements) {
         photo.classList.remove('opacity-100');
       }
       photoElements[num - 1].classList.add('opacity-100');
     }
-  
+    
+    //Iterates slowly and calls alternateMePhotos to continuesly cycle photos
     function cycleMePhotos() {
       if (currentMePhoto > 4) {
         currentMePhoto = 1;
@@ -99,7 +106,8 @@
       currentMePhoto = currentMePhoto + 1;
       setTimeout(() => { cycleMePhotos(); }, 3000);
     }
-  
+    
+    //Switches content pages to given number
     function switchPages(num) {
       screen1.classList.add('opacity-0')
       for (const screen of screenElements) {
@@ -115,7 +123,8 @@
       screenElements[num - 1].classList.remove('pointer-events-none');
       buttonOverlays[num -1].classList.add('opacity-100')
     }
-  
+    
+    //After loading website, sets those variables we defined earlier to different elements from the webpage
     onMount(() => {
       alertText = document.getElementById('alertText')
       holoTextLeft = document.getElementById('holoTextLeft')

@@ -1,10 +1,14 @@
 <script>
+    //Imports stuff for Tailwind
     import "../app.css";
+
+    //Imports vercel utils
     import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit'
     import { inject } from '@vercel/analytics'
 
-inject()
-injectSpeedInsights()
+    //Calls vercel utils
+    inject()
+    injectSpeedInsights()
   </script>
   
   <slot />

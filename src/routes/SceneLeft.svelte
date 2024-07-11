@@ -1,42 +1,53 @@
-5<script>
+ <script>
+    //imports from ThreeJS
+    import { BoxGeometry, MeshBasicMaterial, EdgesGeometry, LineSegments, LineBasicMaterial, MeshPhongMaterial, DefaultLoadingManager } from 'three'
+    import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+
+    //imports from Threlte
     import { T, useTask } from '@threlte/core'
     import { interactivity } from '@threlte/extras'
-    import { spring } from 'svelte/motion'
-    import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
     import { useLoader } from '@threlte/core'
-    import { BoxGeometry, MeshBasicMaterial, EdgesGeometry, LineSegments, LineBasicMaterial, MeshPhongMaterial, DefaultLoadingManager } from 'three'
+
+    //imports from svelte
     import { createEventDispatcher } from 'svelte'
+    import { spring } from 'svelte/motion'
+
+    //imports from store
     import { finalLoaded } from '../stores/loading.js'
-    const dispatch = createEventDispatcher()
 
-    const surfBoard = useLoader(GLTFLoader).load('https://cdn.tinyglb.com/models/f4cedb874eb449ce9687c5ab27faddc9.glb')
-
-
-    
-
+    //calls interactivity, allowing for interaction with 3D objects
     interactivity()
 
+
+    //Defines 'dispatch' as an event dispatcher
+    const dispatch = createEventDispatcher()
+
+    //Defines 'surfboard' as the linked glb file
+    const surfBoard = useLoader(GLTFLoader).load('https://cdn.tinyglb.com/models/f4cedb874eb449ce9687c5ab27faddc9.glb')
+
+    //Defines other variables
     let boardRotation = spring(0)
     let canBoardRotate = true
     let tempRotation = 0
     let boardPosX = spring(-1000)
     let boardPosY = spring(0)
     let boardRotationTemp = 0
-
     let canBeHovered = false
-
     let allLoaded = false
 
-
+    //useTask is called every frame, with delta (difference between frames)
     useTask((delta)=>{
-
+        //if we allow the board to rotate then change the boards rotation by half of the frame delta, every frame
         if(canBoardRotate) {
         boardRotationTemp =+ (boardRotationTemp + (delta/2))
         boardRotation.set(boardRotationTemp)
         }
+        //if we dont allow the board to rotate then set the boards rotation to its default
         if(!canBoardRotate) {
         boardRotationTemp = -1.5
         }
+        //Everytime this is called, check if the boards rotation is above 4.76 (a full rotation)
+        //if so, reset the boards rotation to its default rotation
         if (boardRotationTemp >= 4.76) {
             boardRotationTemp = -1.5
             boardRotation.update(() => -1.5, { hard: true });
@@ -44,6 +55,7 @@
         
     })
 
+    //Functions to handle hovering over the 3D object
     function boardLoad() {
     boardPosX.set(-500)
     }
@@ -59,17 +71,21 @@
     }
     
 
-
+    //this is called every time the surfboard file changes
 $: if ($surfBoard) {
+    //if surfboard exists then go through every 'child' (basicly component) of the scene of the surfboard.glb file
     $surfBoard.scene.traverse((child) => {
+        //for each child check if the child is a mesh
         if (child.isMesh) {
+            //if it is a mesh, then set the material to desired state
             child.material = new MeshPhongMaterial({ color: 'white', wireframe: false });
         }
     });
     }
 
-
+    //every time the finalLoaded store is changed, this function is run
     finalLoaded.subscribe((value) => {
+        //if finalLoaded = true, then call the boardLoad() after 500 ms, bringign the file into the scene
         if (value == true) {
             setTimeout(()=>{
                 boardLoad()

@@ -208,10 +208,10 @@
   
             <div class="w-full h-1/2">
               <div class="w-full h-full flex justify-center items-center ">
-                <div class="size-80 rounded-full p-4 border-[5px] border-white translate-y-4 flex justify-center items-center">
+                <div class="size-80 rounded-full border-[5px] border-white translate-y-4 flex justify-center items-center">
   
                   <img id="photo1" src={mePhoto1} 
-                  class="opacity-100 size-[280px] rounded-full absolute duration-500" alt="Vann holding his dog"
+                  class="opacity-100 size-[91%] rounded-full absolute duration-500" alt="Vann holding his dog"
                   >
                   
                   <img id="photo2" src={mePhoto2} 
@@ -575,3 +575,39 @@
     </div>
   
   </div>
+  <div id="warnbox" class="hidden absolute w-screen h-screen bg-gray-600 flex items-center justify-center">
+    <div class="w-[90%] h-fit rounded-[50px] bg-gray-300">
+      <div class="w-full h-1/2 flex justify-center items-center p-8">
+        <span class="text-[40px] font-bold text-red-800 text-center">
+          Incompatable Screen Resolution Detected
+        </span>
+      </div>
+      <div class="w-full h-1/2 flex justify-center items-center p-8">
+        <p class="text-[20px] -translate-y-4 text-center">
+          This webpage is designed for desktop web browsers only, please resize the window to continue.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <style lang="postcss">
+  @media (max-width: 1350px) {
+    #content-container {
+      visibility: hidden;
+      position: absolute;
+    }
+    #warnbox {
+      display: flex;
+    }
+  }
+  @media (max-height: 750px) {
+    #content-container {
+      visibility: hidden;
+      position: absolute;
+    }
+    #warnbox {
+      display: flex;
+    }
+  }
+
+  </style>

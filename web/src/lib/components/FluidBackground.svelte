@@ -2,6 +2,8 @@
   import { browser } from '$app/environment';
   import { onMount, onDestroy } from 'svelte';
 
+  let {PRESSURE_SPREAD, VISCOSITY, PEN_RADIUS } = $props()
+
   let canvas;
   let ctx;
 
@@ -11,9 +13,9 @@
   // =========================
   // 🔧 TWEAK THESE SETTINGS
   // =========================
-  let VISCOSITY = 0.92;        // 0.94 → 0.999 (higher = smoother/slower)
-  let PRESSURE_SPREAD = 0.3;   // 0.05 → 0.6 (higher = more explosive)
-  let PEN_RADIUS = 20;          // size of interaction
+      // 0.94 → 0.999 (higher = smoother/slower)
+   // 0.05 → 0.6 (higher = more explosive)        
+   // // size of interaction
   let MAX_SPEED = 15;           // intensity of color response
   let CELL_SIZE = 10;           // grid resolution (smaller = more detail, heavier)
 	const FLOW_COLOR = { r: 255, g: 255, b: 255 }; // <-- change this { r: 41, g: 62, b: 92 }

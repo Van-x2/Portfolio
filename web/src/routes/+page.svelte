@@ -1,12 +1,17 @@
 <script>
     // @ts-nocheck
     import FluidBackground from "$lib/components/FluidBackground.svelte";
+    import Slider from "$lib/components/Slider.svelte";
 
     let panelWidth = $state(75);
     let dragging = $state(false);
     let mainPanel;
     let animated = $state(true);
     let mainPanelClosed = $state(false);
+
+    let VISCOSITY = $state(0.92);
+    let PRESSURE_SPREAD = $state(0.3);
+    let PEN_RADIUS = $state(20);  
 
     function onMouseDown(e) {
         dragging = true;
@@ -34,13 +39,18 @@
             mainPanelClosed = false
         }
     }
+
+    function homeBtnPressed() {
+        panelWidth = 75
+        mainPanelClosed = false
+    }
     
 </script>
 
 <svelte:window onmousemove={onMouseMove} onmouseup={onMouseUp} />
 
 <div class="fixed inset-0 -z-10 bg-[#1b2636]">
-    <FluidBackground />
+    <FluidBackground {PEN_RADIUS} {VISCOSITY} {PRESSURE_SPREAD} />
 </div>
 
 <div class="fixed inset-0 z-10 flex justify-between p-6">
@@ -70,8 +80,35 @@
                     {/each}
                 </div>
         </div>
-        <div class="{mainPanelClosed ? 'z-30' : 'opacity-0 z-20'} absolute z-20 transition-all duration-300 w-full h-52  bg-pink-400 ">
+        <div class="{mainPanelClosed ? 'z-30' : 'opacity-0 z-20'} absolute flex flex-col justify-end z-20 transition-all duration-300 w-full h-48 ">
             
+            <div class="w-full flex flex-col ">
+                <h1 class=" text-[18px] text-white font-noticia">
+                    Radius
+                </h1>
+                <div class="w-full h-8">
+                    <Slider bind:value={PEN_RADIUS} min={6} max={80}/>
+                </div>
+            </div>
+
+            <div class="w-full flex flex-col ">
+                <h1 class=" text-[18px] text-white font-noticia">
+                    Viscosity
+                </h1>
+                <div class="w-full h-8">
+                    <Slider bind:value={VISCOSITY} min={0.6} max={0.990}/>
+                </div>
+            </div>
+
+            <div class="w-full flex flex-col ">
+                <h1 class=" text-[18px] text-white font-noticia">
+                    Pressure Spread
+                </h1>
+                <div class="w-full h-8">
+                    <Slider bind:value={PRESSURE_SPREAD} min={0.05} max={0.88}/>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -91,7 +128,7 @@
             <div class="w-full h-20 mb-6">
                 <div class="w-full h-1/2 flex justify-center items-center">
                     <!-- svelte-ignore a11y_consider_explicit_label -->
-                    <button class="cursor-pointer fill-amber-50" onclick={console.log("Home Button Clicked")}>
+                    <button class="cursor-pointer fill-amber-50" onclick={homeBtnPressed}>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7 stroke-amber-50">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
                         </svg>

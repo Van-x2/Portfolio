@@ -1,8 +1,9 @@
 <script lang="js">
   import { browser } from '$app/environment';
   import { onMount, onDestroy } from 'svelte';
+  import { parseGIF, decompressFrames } from 'gifuct-js';
 
-  let {PRESSURE_SPREAD, VISCOSITY, PEN_RADIUS } = $props()
+  let { PRESSURE_SPREAD, VISCOSITY, PEN_RADIUS, onready, frozen } = $props();
 
   let canvas;
   let ctx;
@@ -10,25 +11,115 @@
   let width = 0;
   let height = 0;
 
-  // =========================
-  // 🔧 TWEAK THESE SETTINGS
-  // =========================
-      // 0.94 → 0.999 (higher = smoother/slower)
-   // 0.05 → 0.6 (higher = more explosive)        
-   // // size of interaction
-  let MAX_SPEED = 15;           // intensity of color response
-  let CELL_SIZE = 10;           // grid resolution (smaller = more detail, heavier)
-	const FLOW_COLOR = { r: 255, g: 255, b: 255 }; // <-- change this { r: 41, g: 62, b: 92 }
-	
-  // =========================
+  let MAX_SPEED = $derived(frozen ? 256 : 15);
+
+  const CELL_SIZE = 10;
+
+  const FLOW_COLOR = { r: 255, g: 255, b: 255 };
 
   const BG = { r: 27, g: 38, b: 54 };
-  const FADE_CELLS = 4;
 
   let COLS, ROWS;
   let cells = [];
 
   const mouse = { x: -999, y: -999, px: -999, py: -999 };
+
+  // === STAMP STATE ===
+  let frames = [];
+  let stampImageData = null;
+  let stampCanvas = null;
+  let stampCtx = null;
+  let frameTimer = null;
+  
+
+  async function loadStamp(src) {
+    const ext = src.split('.').pop().toLowerCase();
+
+    if (ext === 'gif') {
+      const resp = await fetch(src);
+      const buffer = await resp.arrayBuffer();
+      const gif = parseGIF(buffer);
+      frames = decompressFrames(gif, true);
+      if (!frames.length) return;
+
+      stampCanvas = document.createElement('canvas');
+      stampCanvas.width = frames[0].dims.width;
+      stampCanvas.height = frames[0].dims.height;
+      stampCtx = stampCanvas.getContext('2d');
+
+      playGif();
+    } else {
+      await new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          stampCanvas = document.createElement('canvas');
+          stampCanvas.width = img.naturalWidth;
+          stampCanvas.height = img.naturalHeight;
+          stampCtx = stampCanvas.getContext('2d');
+          stampCtx.drawImage(img, 0, 0);
+          stampImageData = stampCtx.getImageData(0, 0, stampCanvas.width, stampCanvas.height);
+          resolve();
+        };
+        img.src = src;
+      });
+    }
+  }
+
+  function playGif() {
+    let i = 0;
+    function next() {
+      const frame = frames[i % frames.length];
+      const imageData = new ImageData(
+        new Uint8ClampedArray(frame.patch),
+        frame.dims.width,
+        frame.dims.height
+      );
+      stampCtx.putImageData(imageData, 0, 0);
+      stampImageData = stampCtx.getImageData(0, 0, stampCanvas.width, stampCanvas.height);
+      i++;
+      frameTimer = setTimeout(next, frame.delay);
+    }
+    next();
+  }
+
+function stampAtPosition(originCol = 0, originRow = 0, colSpan = 40, rowSpan = 70, strength = 8) {
+    if (!stampImageData) return;
+
+    const imgW = stampCanvas.width;
+    const imgH = stampCanvas.height;
+
+    for (let row = 0; row < rowSpan; row++) {
+      for (let col = 0; col < colSpan; col++) {
+        const targetCol = originCol + col;
+        const targetRow = originRow + row;
+        if (targetCol >= COLS || targetRow >= ROWS) continue;
+
+        const srcX = Math.floor((col / colSpan) * imgW);
+        const srcY = Math.floor((row / rowSpan) * imgH);
+        const i = (srcY * imgW + srcX) * 4;
+
+        const r = stampImageData.data[i];
+        const g = stampImageData.data[i + 1];
+        const b = stampImageData.data[i + 2];
+        const a = stampImageData.data[i + 3];
+
+        const brightness = (r * 0.299 + g * 0.587 + b * 0.114) / 255;
+        const c = cell(targetCol, targetRow);
+
+        if (a < 128 || brightness < 0.05) {
+          c.xv = 0;
+          c.yv = 0;
+        } else {
+          // pin during freeze using a stable per-cell direction
+          // so it looks static while held, but has real velocity to flow on release
+          const angle = (targetCol * 2.4 + targetRow * 1.7) % (Math.PI * 2);
+          c.xv = Math.cos(angle) * brightness * strength;
+          c.yv = Math.sin(angle) * brightness * strength;
+        }
+      }
+    }
+}
+  // ===================
 
   function resize() {
     width = canvas.clientWidth;
@@ -118,17 +209,11 @@
     c.pressure = (px + py) * 0.25;
   }
 
-  function updateVelocity(c, col, row) {
-    c.xv +=
-      (gpr(c.left) - gpr(c.right)) * PRESSURE_SPREAD;
-
-    c.yv +=
-      (gpr(c.up) - gpr(c.down)) * PRESSURE_SPREAD;
-
+  function updateVelocity(c) {
+    c.xv += (gpr(c.left) - gpr(c.right)) * PRESSURE_SPREAD;
+    c.yv += (gpr(c.up) - gpr(c.down)) * PRESSURE_SPREAD;
     c.xv *= VISCOSITY;
     c.yv *= VISCOSITY;
-
-    
   }
 
   let imgData;
@@ -148,17 +233,19 @@
   let animationFrame;
 
   function draw() {
-    const mvx = mouse.x - mouse.px;
-    const mvy = mouse.y - mouse.py;
+    if (!frozen) {
+      const mvx = mouse.x - mouse.px;
+      const mvy = mouse.y - mouse.py;
 
-    if (Math.sqrt(mvx * mvx + mvy * mvy) > 0.5) {
-      injectVelocity(mouse.x, mouse.y, mvx * 0.9, mvy * 0.9, PEN_RADIUS);
+      if (Math.sqrt(mvx * mvx + mvy * mvy) > 0.5) {
+        injectVelocity(mouse.x, mouse.y, mvx * 0.9, mvy * 0.9, PEN_RADIUS);
+      }
+
+      mouse.px = mouse.x;
+      mouse.py = mouse.y;
+
+      for (let i = 0; i < cells.length; i++) updatePressure(cells[i]);
     }
-
-    mouse.px = mouse.x;
-    mouse.py = mouse.y;
-
-    for (let i = 0; i < cells.length; i++) updatePressure(cells[i]);
 
     buf32.fill(BG32);
 
@@ -171,50 +258,46 @@
         const t = Math.sqrt(Math.min(speed, MAX_SPEED) / MAX_SPEED);
 
         const r = Math.round(BG.r + (FLOW_COLOR.r - BG.r) * t);
-				const g = Math.round(BG.g + (FLOW_COLOR.g - BG.g) * t);
-				const b = Math.round(BG.b + (FLOW_COLOR.b - BG.b) * t);
+        const g = Math.round(BG.g + (FLOW_COLOR.g - BG.g) * t);
+        const b = Math.round(BG.b + (FLOW_COLOR.b - BG.b) * t);
 
         const px = rgba(r, g, b, 255);
-
         const x0 = col * CELL_SIZE;
         const y0 = row * CELL_SIZE;
 
-for (let dy = 1; dy < CELL_SIZE; dy++) {
-  const py = y0 + dy;
-  if (py < 0 || py >= height) continue;
-
-  const rowBase = py * width;
-
-  for (let dx = 1; dx < CELL_SIZE; dx++) {
-    const pxPos = x0 + dx;
-    if (pxPos < 0 || pxPos >= width) continue;
-
-    buf32[rowBase + pxPos] = px;
-  }
-}
+        for (let dy = 1; dy < CELL_SIZE; dy++) {
+          const py = y0 + dy;
+          if (py < 0 || py >= height) continue;
+          const rowBase = py * width;
+          for (let dx = 1; dx < CELL_SIZE; dx++) {
+            const pxPos = x0 + dx;
+            if (pxPos < 0 || pxPos >= width) continue;
+            buf32[rowBase + pxPos] = px;
+          }
+        }
       }
     }
 
     ctx.putImageData(imgData, 0, 0);
 
-    for (let row = 0; row < ROWS; row++) {
-      for (let col = 0; col < COLS; col++) {
-        updateVelocity(cell(col, row), col, row);
+    if (!frozen) {
+      for (let row = 0; row < ROWS; row++) {
+        for (let col = 0; col < COLS; col++) {
+          updateVelocity(cell(col, row));
+        }
       }
     }
 
     animationFrame = requestAnimationFrame(draw);
   }
 
-function handleMouseMove(e) {
-  const rect = canvas.getBoundingClientRect();
-
-  mouse.px = mouse.x;
-  mouse.py = mouse.y;
-
-  mouse.x = e.clientX - rect.left;
-  mouse.y = e.clientY - rect.top;
-}
+  function handleMouseMove(e) {
+    const rect = canvas.getBoundingClientRect();
+    mouse.px = mouse.x;
+    mouse.py = mouse.y;
+    mouse.x = e.clientX - rect.left;
+    mouse.y = e.clientY - rect.top;
+  }
 
   onMount(() => {
     if (!browser) return;
@@ -225,11 +308,14 @@ function handleMouseMove(e) {
     window.addEventListener('mousemove', handleMouseMove);
 
     draw();
+
+    onready?.({ stamp: stampAtPosition, loadStamp });
   });
 
   onDestroy(() => {
     if (!browser) return;
     cancelAnimationFrame(animationFrame);
+    clearTimeout(frameTimer);
     window.removeEventListener('resize', resize);
     window.removeEventListener('mousemove', handleMouseMove);
   });
@@ -248,7 +334,7 @@ function handleMouseMove(e) {
     position: absolute;
     inset: 0;
     overflow: hidden;
-    z-index: -1; /* makes it a background */
+    z-index: -1;
   }
 </style>
 

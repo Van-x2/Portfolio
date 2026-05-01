@@ -19,20 +19,20 @@
 		"@eslint/js": "^10.0.1",
 		"@playwright/test": "^1.59.1",
 		"@sveltejs/adapter-vercel": "^6.3.3",
-		"@sveltejs/kit": "^2.57.0",
-		"@sveltejs/vite-plugin-svelte": "^7.0.0",
+		"@sveltejs/kit": "^2.58.0",
+		"@sveltejs/vite-plugin-svelte": "^4.0.4",
 		"@tailwindcss/typography": "^0.5.19",
 		"@tailwindcss/vite": "^4.2.2",
 		"@types/node": "^24",
 		"eslint": "^10.2.0",
 		"eslint-plugin-svelte": "^3.17.0",
 		"globals": "^17.4.0",
-		"svelte": "^5.55.2",
-		"svelte-check": "^4.4.6",
+		"svelte": "^5.55.5",
+		"svelte-check": "^3.8.6",
 		"tailwindcss": "^4.2.2",
-		"typescript": "^6.0.2",
+		"typescript": "^5.9.3",
 		"typescript-eslint": "^8.58.1",
-		"vite": "^8.0.10"
+		"vite": "^5.4.21"
 	},
 	"dependencies": {
 		"gifuct-js": "^2.1.2"

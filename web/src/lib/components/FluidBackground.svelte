@@ -13,7 +13,7 @@
 
   let MAX_SPEED = $derived(frozen ? 256 : 15);
 
-  const CELL_SIZE = 10;
+  const CELL_SIZE = 8;
 
   const FLOW_COLOR = { r: 255, g: 255, b: 255 };
 

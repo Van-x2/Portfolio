@@ -16,29 +16,29 @@
     let fluidApi = $state(null);
     let stampInterval = null;
 
-    
-
     async function onready(api) {
         fluidApi = api;
-        // preload your image or gif here, e.g:
-        // await fluidApi.loadStamp('/your-photo.png');
-        // await fluidApi.loadStamp('/your-animation.gif');
     }
 
-let frozen = $state(false);
+    let frozen = $state(false);
 
-  function startStamp() {
-    frozen = true;
-    stampInterval = setInterval(() => {
-      fluidApi?.stamp(2, 2, 45, 70, 40);
-    }, 50);
-  }
+    function showHeadshot() {
+        fluidApi?.loadStamp('/headshot.png');
+        startStamp();
+    }
 
-function stopStamp() {
-    clearInterval(stampInterval);
-    stampInterval = null;
-    frozen = false;
-}
+    function startStamp() {
+        frozen = true;
+        stampInterval = setInterval(() => {
+            fluidApi?.stamp(2, 2, 45, 70, 40);
+        }, 50);
+    }
+
+    function stopStamp() {
+        clearInterval(stampInterval);
+        stampInterval = null;
+        frozen = false;
+    }
 
     function onMouseDown(e) {
         dragging = true;
@@ -70,6 +70,40 @@ function stopStamp() {
     function homeBtnPressed() {
         panelWidth = 75;
         mainPanelClosed = false;
+        scrollToSection(0);
+    }
+
+    const sections = ['Philosophy', 'Projects', 'Research', 'Blogs'];
+
+    let scrollContainer = $state(null);
+    let sectionEls = $state([]);
+    let sectionProgresses = $state(sections.map(() => 0)); // 0–100 per section
+    let activeSection = $state(0);
+
+    function scrollToSection(index) {
+        if (!scrollContainer || !sectionEls[index]) return;
+        sectionEls[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function onScroll() {
+        if (!scrollContainer) return;
+        const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+        const maxScroll = scrollHeight - clientHeight;
+        if (maxScroll <= 0) return;
+
+        // Divide total scroll range evenly into N sections
+        const sectionRange = maxScroll / sections.length;
+
+        let newProgresses = sections.map((_, i) => {
+            const start = i * sectionRange;
+            const end = (i + 1) * sectionRange;
+            if (scrollTop <= start) return 0;
+            if (scrollTop >= end) return 100;
+            return Math.round(((scrollTop - start) / sectionRange) * 100);
+        });
+
+        sectionProgresses = newProgresses;
+        activeSection = Math.min(Math.floor(scrollTop / sectionRange), sections.length - 1);
     }
 </script>
 
@@ -79,12 +113,23 @@ function stopStamp() {
     <FluidBackground {PEN_RADIUS} {VISCOSITY} {PRESSURE_SPREAD} {onready} {frozen} />
 </div>
 
-<div class="fixed inset-0 z-10 flex justify-between p-6">
-
-    <div class="w-[25%] h-full flex items-end pr-12 select-none relative">
+<div
+    class="fixed z-10 flex justify-between"
+    style="
+        top: 0;
+        left: 0;
+        width: 125%;
+        height: 125%;
+        padding: 20px;
+        transform: scale(0.8);
+        transform-origin: top left;
+    "
+>
+    <!-- Left info panel -->
+    <div class="w-[25%] h-full flex items-end pr-12 select-none relative translate-x-1">
         <div class="{mainPanelClosed ? 'opacity-0 z-20' : 'z-30'} absolute transition-all duration-300 w-full h-52 flex flex-col">
             <div class="w-full h-2/3 text-[40px] text-amber-50 font-serif font-[400px]">
-                <h1  class="[text-shadow:0px_4px_6px_rgba(0,0,0,0.9)]">
+                <h1 class="[text-shadow:0px_4px_6px_rgba(0,0,0,0.9)]">
                     Vann Hāwanaloaokekai
                     <br>
                     Siphers
@@ -110,27 +155,26 @@ function stopStamp() {
         <div class="{mainPanelClosed ? 'z-30' : 'opacity-0 z-20'} absolute flex flex-col justify-end z-20 transition-all duration-300 w-full h-48">
             <div class="w-full flex flex-col">
                 <h1 class="text-[18px] text-white font-noticia">Radius</h1>
-                <div class="w-full h-8">
-                    <Slider bind:value={PEN_RADIUS} min={6} max={80} />
-                </div>
+                <div class="w-full h-8"><Slider bind:value={PEN_RADIUS} min={6} max={80} /></div>
             </div>
             <div class="w-full flex flex-col">
                 <h1 class="text-[18px] text-white font-noticia">Viscosity</h1>
-                <div class="w-full h-8">
-                    <Slider bind:value={VISCOSITY} min={0.6} max={0.990} />
-                </div>
+                <div class="w-full h-8"><Slider bind:value={VISCOSITY} min={0.6} max={0.990} /></div>
             </div>
             <div class="w-full flex flex-col">
                 <h1 class="text-[18px] text-white font-noticia">Pressure Spread</h1>
-                <div class="w-full h-8">
-                    <Slider bind:value={PRESSURE_SPREAD} min={0.05} max={0.88} />
-                </div>
+                <div class="w-full h-8"><Slider bind:value={PRESSURE_SPREAD} min={0.05} max={0.88} /></div>
             </div>
         </div>
     </div>
 
-    <div bind:this={mainPanel} style="width: {panelWidth}%" class="{animated ? 'transition-all duration-300' : ''} h-full backdrop-blur-[1px] bg-[#121924]/95 rounded-2xl drop-shadow-2xl border border-slate-700 p-6 flex pointer-events-auto relative">
-
+    <!-- Main panel -->
+    <div
+        bind:this={mainPanel}
+        style="width: {panelWidth}%"
+        class="{animated ? 'transition-all duration-300' : ''} h-full backdrop-blur-[1px] bg-[#121924]/95 rounded-2xl drop-shadow-2xl border border-slate-700 p-6 flex pointer-events-auto relative"
+    >
+        <!-- Drag handle -->
         <div class="w-10 h-36 absolute top-1/2 -translate-y-1/2 translate-x-2 -left-12 bg-[#121924]/95 rounded-bl-2xl rounded-tl-2xl border border-slate-700 border-r-0">
             <div class="w-full h-full justify-center items-center flex flex-col">
                 <button aria-label="Resize panel" onmousedown={onMouseDown} class="w-full h-full justify-center items-center flex flex-col cursor-ew-resize">
@@ -141,71 +185,111 @@ function stopStamp() {
             </div>
         </div>
 
-        <div class="w-8 h-full mr-6 flex flex-col">
-            <div class="w-full h-20 mb-6">
-                <div class="w-full h-1/2 flex justify-center items-center">
-                    <!-- svelte-ignore a11y_consider_explicit_label -->
-                    <button class="cursor-pointer fill-amber-50" onclick={homeBtnPressed}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7 stroke-amber-50">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                        </svg>
-                    </button>
+        <!-- Sidebar -->
+        <div class="w-10 h-full mr-6 flex shrink-0">
+
+            <!-- Nav buttons -->
+            <div class="w-8 flex flex-col">
+                <div class="w-8 h-20 mb-6 shrink-0">
+                    <div class="w-full h-1/2 flex justify-center items-center">
+                        <!-- svelte-ignore a11y_consider_explicit_label -->
+                        <button class="cursor-pointer fill-amber-50" onclick={homeBtnPressed}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7 stroke-amber-50">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="w-full h-1/2 flex justify-center items-center">
+                        <!-- svelte-ignore a11y_consider_explicit_label -->
+                        <button class="cursor-pointer fill-amber-50" onclick={() => console.log("Back Button Clicked")}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7 stroke-amber-50">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
-                <div class="w-full h-1/2 flex justify-center items-center">
-                    <!-- svelte-ignore a11y_consider_explicit_label -->
-                    <button class="cursor-pointer fill-amber-50" onclick={console.log("Back Button Clicked")}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7 stroke-amber-50">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
-                        </svg>
-                    </button>
+
+                <!-- Section nav buttons -->
+                <div class="w-8 flex-1 flex flex-col -translate-x-1.5">
+                    {#each sections as section, i}
+                        <div class="flex-1 flex justify-center items-center">
+                            <button
+                                onmouseenter={i === 0 ? showHeadshot : undefined}
+                                onmouseleave={i === 0 ? stopStamp : undefined}
+                                onclick={() => scrollToSection(i)}
+                                class="cursor-pointer rotate-270 font-noticia text-2xl transition-all duration-300 -translate-x-1 whitespace-nowrap {activeSection === i ? 'text-white' : 'text-amber-50'}"
+                            >
+                                <h1>{section}</h1>
+                            </button>
+                        </div>
+                    {/each}
                 </div>
             </div>
-            <div class="w-full flex-1">
-                <div class="w-full h-1/4 flex justify-center items-center">
-                    <button onmouseenter={startStamp} onmouseleave={stopStamp} class="cursor-pointer rotate-270 font-noticia text-2xl text-amber-50 -translate-x-1">
-                        <h1>Philosophy</h1>
-                    </button>
-                </div>
-                <div class="w-full h-1/4 flex justify-center items-center">
-                    <button class="cursor-pointer rotate-270 font-noticia text-2xl text-amber-50 -translate-x-1">
-                        <h1>Projects</h1>
-                    </button>
-                </div>
-                <div class="w-full h-1/4 flex justify-center items-center">
-                    <button class="cursor-pointer rotate-270 font-noticia text-2xl text-amber-50 -translate-x-1">
-                        <h1>Experience</h1>
-                    </button>
-                </div>
-                <div class="w-full h-1/4 flex justify-center items-center">
-                    <button class="cursor-pointer rotate-270 font-noticia text-2xl text-amber-50 -translate-x-1">
-                        <h1>Blogs</h1>
-                    </button>
-                </div>
+
+            <!-- 4 stacked progress bars -->
+            <div class="w-[5px] flex flex-col ml-1" style="gap: 20px; padding-top: 104px;">
+                {#each sections as _section, i}
+                    <div class="flex-1 rounded-full bg-slate-700/40 relative overflow-hidden">
+                        <div
+                            class="absolute top-0 left-0 w-full rounded-full transition-all duration-150"
+                            style="
+                                height: {sectionProgresses[i]}%;
+                                background-color: {activeSection === i
+                                    ? 'rgba(255,255,255,0.75)'
+                                    : sectionProgresses[i] === 100
+                                        ? 'rgba(255,255,255,0.75)'
+                                        : 'rgba(255,255,255,0.1)'};
+                            "
+                        ></div>
+                    </div>
+                {/each}
             </div>
         </div>
 
-        <div class="flex-1 h-full">
-            <div class="fixed bottom-6 left-6 z-50 flex gap-3">
-    <button
-        class="bg-white text-black px-4 py-2 rounded"
-        onclick={() => fluidApi?.loadStamp('/headshot.png')}
-    >
-        Load Image
-    </button>
-        <button
-        class="bg-white text-black px-4 py-2 rounded"
-        onclick={() => fluidApi?.loadStamp('/surfboard.gif')}
-    >
-        Load GIF
-    </button>
-<button
-    class="bg-white text-black px-4 py-2 rounded"
-    onmousedown={startStamp}
-    onmouseup={stopStamp}
->
-    Hold to Stamp
-</button>
-</div>
+        <!-- Scrollable content -->
+        <div
+            bind:this={scrollContainer}
+            onscroll={onScroll}
+            class="flex-1 h-full overflow-y-auto overflow-x-hidden scroll-smooth rounded-xl"
+            style="scrollbar-width: none;"
+        >
+            {#each sections as section, i}
+                <div
+                    bind:this={sectionEls[i]}
+                    class="flex flex-col justify-start pt-6 pl-2"
+                    style="min-height: 100%;"
+                >
+                    <div class="mb-8 pb-4 border-b border-slate-700/60 flex items-baseline justify-between">
+                        <h2 class="font-serif text-4xl text-amber-50">{section}</h2>
+                        <span class="font-noticia text-xs text-amber-50/40 uppercase tracking-widest">{String(i + 1).padStart(2, '0')} / {String(sections.length).padStart(2, '0')}</span>
+                    </div>
+
+                    <div class="flex flex-col gap-4 text-amber-50/60 font-noticia text-base">
+                        {#if section === 'Philosophy'}
+                            <p class="leading-relaxed">Your philosophy and personal values go here.</p>
+                            <div class="h-[60vh] rounded-xl border border-slate-700/40 flex items-center justify-center text-slate-600 text-sm">
+                                [ Philosophy content ]
+                            </div>
+                        {:else if section === 'Projects'}
+                            <p class="leading-relaxed">Showcase your projects here.</p>
+                            <div class="h-[60vh] rounded-xl border border-slate-700/40 flex items-center justify-center text-slate-600 text-sm">
+                                [ Projects content ]
+                            </div>
+                        {:else if section === 'Research'}
+                            <p class="leading-relaxed">Papers, experiments, or explorations you've pursued.</p>
+                            <div class="h-[60vh] rounded-xl border border-slate-700/40 flex items-center justify-center text-slate-600 text-sm">
+                                [ Research content ]
+                            </div>
+                        {:else if section === 'Blogs'}
+                            <p class="leading-relaxed">Your writing, essays, or thoughts on topics you care about.</p>
+                            <div class="h-[60vh] rounded-xl border border-slate-700/40 flex items-center justify-center text-slate-600 text-sm">
+                                [ Blog content ]
+                            </div>
+                        {/if}
+                    </div>
+                </div>
+            {/each}
         </div>
+
     </div>
 </div>

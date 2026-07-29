@@ -30,7 +30,7 @@
     function startStamp() {
         frozen = true;
         stampInterval = setInterval(() => {
-            fluidApi?.stamp(2, 2, 45, 70, 40);
+            fluidApi?.stamp(2, 2, 60, 90, 40);
         }, 50);
     }
 
@@ -73,11 +73,11 @@
         scrollToSection(0);
     }
 
-    const sections = ['Philosophy', 'Projects', 'Research', 'Blogs'];
+    const sections = ['Welina', 'Projects', 'Research', 'Blogs'];
 
     let scrollContainer = $state(null);
     let sectionEls = $state([]);
-    let sectionProgresses = $state(sections.map(() => 0)); // 0–100 per section
+    let sectionProgresses = $state(sections.map(() => 0));
     let activeSection = $state(0);
 
     function scrollToSection(index) {
@@ -88,22 +88,38 @@
     function onScroll() {
         if (!scrollContainer) return;
         const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
-        const maxScroll = scrollHeight - clientHeight;
-        if (maxScroll <= 0) return;
-
-        // Divide total scroll range evenly into N sections
-        const sectionRange = maxScroll / sections.length;
 
         let newProgresses = sections.map((_, i) => {
-            const start = i * sectionRange;
-            const end = (i + 1) * sectionRange;
-            if (scrollTop <= start) return 0;
-            if (scrollTop >= end) return 100;
-            return Math.round(((scrollTop - start) / sectionRange) * 100);
+            const el = sectionEls[i];
+            if (!el) return 0;
+
+            const sectionStart = el.offsetTop;
+            const nextEl = sectionEls[i + 1];
+            const sectionEnd = nextEl ? nextEl.offsetTop : scrollHeight;
+            const sectionHeight = sectionEnd - sectionStart;
+
+            // Scrollable range within this section
+            const scrollable = sectionHeight - clientHeight;
+
+            if (scrollable <= 0) {
+                // Section is shorter than the viewport — complete once reached
+                return scrollTop >= sectionStart ? 100 : 0;
+            }
+
+            const scrolledIn = scrollTop - sectionStart;
+            if (scrolledIn <= 0) return 0;
+            if (scrolledIn >= scrollable) return 100;
+            return Math.round((scrolledIn / scrollable) * 100);
         });
 
         sectionProgresses = newProgresses;
-        activeSection = Math.min(Math.floor(scrollTop / sectionRange), sections.length - 1);
+
+        for (let i = sectionEls.length - 1; i >= 0; i--) {
+            if (sectionEls[i] && scrollTop >= sectionEls[i].offsetTop - 4) {
+                activeSection = i;
+                break;
+            }
+        }
     }
 </script>
 
@@ -118,11 +134,9 @@
     style="
         top: 0;
         left: 0;
-        width: 125%;
-        height: 125%;
+        width: 100%;
+        height: 100%;
         padding: 20px;
-        transform: scale(0.8);
-        transform-origin: top left;
     "
 >
     <!-- Left info panel -->
@@ -214,8 +228,6 @@
                     {#each sections as section, i}
                         <div class="flex-1 flex justify-center items-center">
                             <button
-                                onmouseenter={i === 0 ? showHeadshot : undefined}
-                                onmouseleave={i === 0 ? stopStamp : undefined}
                                 onclick={() => scrollToSection(i)}
                                 class="cursor-pointer rotate-270 font-noticia text-2xl transition-all duration-300 -translate-x-1 whitespace-nowrap {activeSection === i ? 'text-white' : 'text-amber-50'}"
                             >
@@ -253,42 +265,135 @@
             class="flex-1 h-full overflow-y-auto overflow-x-hidden scroll-smooth rounded-xl"
             style="scrollbar-width: none;"
         >
-            {#each sections as section, i}
-                <div
-                    bind:this={sectionEls[i]}
-                    class="flex flex-col justify-start pt-6 pl-2"
-                    style="min-height: 100%;"
-                >
-                    <div class="mb-8 pb-4 border-b border-slate-700/60 flex items-baseline justify-between">
-                        <h2 class="font-serif text-4xl text-amber-50">{section}</h2>
-                        <span class="font-noticia text-xs text-amber-50/40 uppercase tracking-widest">{String(i + 1).padStart(2, '0')} / {String(sections.length).padStart(2, '0')}</span>
-                    </div>
+            <!-- Welina -->
+            <div
+                bind:this={sectionEls[0]}
+                class="flex flex-col justify-start pt-6 pl-2"
+                style="min-height: 100%;"
+            >
+                <div class="mb-8 pb-4 border-b border-slate-700/60 flex items-baseline justify-between">
+                    <h2 class="font-serif text-4xl text-amber-50">Welina</h2>
+                    <span class="font-noticia text-xs text-amber-50/40 uppercase tracking-widest">01 / 04</span>
+                </div>
 
-                    <div class="flex flex-col gap-4 text-amber-50/60 font-noticia text-base">
-                        {#if section === 'Philosophy'}
-                            <p class="leading-relaxed">Your philosophy and personal values go here.</p>
-                            <div class="h-[60vh] rounded-xl border border-slate-700/40 flex items-center justify-center text-slate-600 text-sm">
-                                [ Philosophy content ]
-                            </div>
-                        {:else if section === 'Projects'}
-                            <p class="leading-relaxed">Showcase your projects here.</p>
-                            <div class="h-[60vh] rounded-xl border border-slate-700/40 flex items-center justify-center text-slate-600 text-sm">
-                                [ Projects content ]
-                            </div>
-                        {:else if section === 'Research'}
-                            <p class="leading-relaxed">Papers, experiments, or explorations you've pursued.</p>
-                            <div class="h-[60vh] rounded-xl border border-slate-700/40 flex items-center justify-center text-slate-600 text-sm">
-                                [ Research content ]
-                            </div>
-                        {:else if section === 'Blogs'}
-                            <p class="leading-relaxed">Your writing, essays, or thoughts on topics you care about.</p>
-                            <div class="h-[60vh] rounded-xl border border-slate-700/40 flex items-center justify-center text-slate-600 text-sm">
-                                [ Blog content ]
-                            </div>
-                        {/if}
+                <div class="flex flex-col gap-4 text-white font-noticia text-base ml-8">
+                    <div class="h-[80vh] flex">
+                        <div class="w-[40vw] h-full">
+                        <div class="w-full -mb-8">
+                            <h1 class=" font-serif text-[100px] leading-35">
+                                Welina Mai
+                                <br>
+                                Kākou,
+                            </h1>
+                        </div>
+                        <div class="w-full">
+                            <p class=" font-serif font- text-amber-50/40 text-[38px] text-right leading-13">
+                                I'm <button class="underline decoration-white decoration-3 decoration-dotted underline-offset-4 hover:text-white duration-200 cursor-text" onmouseenter={showHeadshot}
+                                onmouseleave={stopStamp}>Vann</button>, a Native
+                                <br>
+                                Hawaiian soul-surfer
+                                <br>
+                                with a passion for fluid dynamics, studying
+                                <br>
+                                physics at the University of Hawaii at Mānoa.
+                            </p>
+                        </div>
+
+                        <div class="w-full h-18 flex justify-center items-center pointer-none:">
+                            <img class="mx-8" src="/Waveicon.svg" alt="Wave Icon" />
+                            <img class="mx-8" src="/Waveicon.svg" alt="Wave Icon" />
+                            <img class="mx-8" src="/Waveicon.svg" alt="Wave Icon" />
+                        </div>
+
+                        <div class="w-full">
+                            <p class=" font-serif font- text-amber-50/40 text-[38px] text-left text-nowrap leading-13">
+                            This site is meant to contain and showcase my 
+                            <br>
+                            thoughts and experiences that matter to me.
+                            <br>
+                            Please contact me
+                            <br>
+                            for any inquiries.
+                            </p>
+                        </div>
+
+                        </div>
                     </div>
                 </div>
-            {/each}
+
+                <div class="h-[20vh] w-full ">
+
+                </div>
+            </div>
+
+            <!-- Projects -->
+            <div
+                bind:this={sectionEls[1]}
+                class="flex flex-col justify-start pt-6 pl-2"
+                style="min-height: 100%;"
+            >
+                <div class="mb-8 pb-4 border-b border-slate-700/60 flex items-baseline justify-between">
+                    <h2 class="font-serif text-4xl text-amber-50">Projects</h2>
+                    <span class="font-noticia text-xs text-amber-50/40 uppercase tracking-widest">02 / 04</span>
+                </div>
+
+                <div class="flex flex-col gap-4 text-amber-50/60 font-noticia text-base">
+                    <p class="leading-relaxed">Showcase your projects here.</p>
+                    <div class="h-[60vh] rounded-xl border border-slate-700/40 flex items-center justify-center text-slate-600 text-sm">
+                        [ Projects content ]
+                    </div>
+                </div>
+            </div>
+
+            <!-- Research -->
+            <div
+                bind:this={sectionEls[2]}
+                class="flex flex-col justify-start pt-6 pl-2"
+                style="min-height: 100%;"
+            >
+                <div class="mb-8 pb-4 border-b border-slate-700/60 flex items-baseline justify-between">
+                    <h2 class="font-serif text-4xl text-amber-50">Research</h2>
+                    <span class="font-noticia text-xs text-amber-50/40 uppercase tracking-widest">03 / 04</span>
+                </div>
+
+                <div class="flex flex-col gap-4 text-amber-50/60 font-noticia text-base">
+                    <p class="leading-relaxed">Papers, experiments, or explorations you've pursued.</p>
+                    <div class="h-[60vh] rounded-xl border border-slate-700/40 flex items-center justify-center text-slate-600 text-sm">
+                        [ Research content ]
+                    </div>
+                </div>
+            </div>
+
+            <!-- Blogs -->
+            <div
+                bind:this={sectionEls[3]}
+                class="flex flex-col justify-start pt-6 pl-2"
+                style="min-height: 100%;"
+            >
+                <div class="mb-8 pb-4 border-b border-slate-700/60 flex items-baseline justify-between">
+                    <h2 class="font-serif text-4xl text-amber-50">Blogs</h2>
+                    <span class="font-noticia text-xs text-amber-50/40 uppercase tracking-widest">04 / 04</span>
+                </div>
+
+                <div class="flex flex-col gap-4 text-amber-50/60 font-noticia text-base">
+                    <p class="leading-relaxed">Your writing, essays, or thoughts on topics you care about.</p>
+                    <div class="h-[60vh] rounded-xl border border-slate-700/40 flex items-center justify-center text-slate-600 text-sm">
+                        [ Blog content ]
+                    </div>
+                    <div class="h-[60vh] rounded-xl border border-slate-700/40 flex items-center justify-center text-slate-600 text-sm">
+                        [ Blog content ]
+                    </div>
+                    <div class="h-[60vh] rounded-xl border border-slate-700/40 flex items-center justify-center text-slate-600 text-sm">
+                        [ Blog content ]
+                    </div>
+                    <div class="h-[60vh] rounded-xl border border-slate-700/40 flex items-center justify-center text-slate-600 text-sm">
+                        [ Blog content ]
+                    </div>
+                    <div class="h-[60vh] rounded-xl border border-slate-700/40 flex items-center justify-center text-slate-600 text-sm">
+                        [ Blog content ]
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div>

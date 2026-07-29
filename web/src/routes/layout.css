@@ -8,3 +8,13 @@
   --font-noticia: 'Noticia Text', serif;
 }
 @custom-variant hover (&:hover);
+
+::selection {
+    background-color: white;
+    color: #1b2636; /* dark text so it's readable against white */
+}
+
+::-moz-selection {
+    background-color: white;
+    color: #1b2636;
+}

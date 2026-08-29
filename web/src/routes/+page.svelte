@@ -271,9 +271,11 @@
                 class="flex flex-col justify-start pt-6 pl-2"
                 style="min-height: 100%;"
             >
-                <div class="mb-8 pb-4 border-b border-slate-700/60 flex items-baseline justify-between">
+                <div class="pb-4 flex items-baseline justify-between">
                     <h2 class="font-serif text-4xl text-amber-50">Welina</h2>
-                    <span class="font-noticia text-xs text-amber-50/40 uppercase tracking-widest">01 / 04</span>
+                </div>
+                <div class=" bg-gradient-to-r from-slate-700/60 from-0% via-slate-700/60 via-10% to-transparent to-75% h-px mb-8">
+
                 </div>
 
                 <div class="flex flex-col gap-4 text-white font-noticia text-base ml-8">
@@ -338,7 +340,7 @@
                 </div>
 
                 <div class="flex flex-col gap-4 text-amber-50/60 font-noticia text-base">
-                    <p class="leading-relaxed">Showcase your projects here.</p>
+                    <p class="leading-relaxed">Projects here</p>
                     <div class="h-[60vh] rounded-xl border border-slate-700/40 flex items-center justify-center text-slate-600 text-sm">
                         [ Projects content ]
                     </div>
@@ -357,7 +359,7 @@
                 </div>
 
                 <div class="flex flex-col gap-4 text-amber-50/60 font-noticia text-base">
-                    <p class="leading-relaxed">Papers, experiments, or explorations you've pursued.</p>
+                    <p class="leading-relaxed">Papers, experiments, explorations</p>
                     <div class="h-[60vh] rounded-xl border border-slate-700/40 flex items-center justify-center text-slate-600 text-sm">
                         [ Research content ]
                     </div>
@@ -376,7 +378,7 @@
                 </div>
 
                 <div class="flex flex-col gap-4 text-amber-50/60 font-noticia text-base">
-                    <p class="leading-relaxed">Your writing, essays, or thoughts on topics you care about.</p>
+                    <p class="leading-relaxed">essays, or thoughts on topics</p>
                     <div class="h-[60vh] rounded-xl border border-slate-700/40 flex items-center justify-center text-slate-600 text-sm">
                         [ Blog content ]
                     </div>

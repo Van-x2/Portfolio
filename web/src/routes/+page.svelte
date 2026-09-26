@@ -2,8 +2,9 @@
     // @ts-nocheck
     import FluidBackground from "$lib/components/FluidBackground.svelte";
     import Slider from "$lib/components/Slider.svelte";
+    import { onMount } from "svelte";
 
-    let panelWidth = $state(75);
+    let panelWidth = $state(1400);
     let dragging = $state(false);
     let mainPanel;
     let animated = $state(true);
@@ -19,6 +20,10 @@
     async function onready(api) {
         fluidApi = api;
     }
+    
+    onMount(()=>{
+        fluidApi?.loadStamp('/headshot.png')
+    })
 
     let frozen = $state(false);
 
@@ -50,25 +55,25 @@
     function onMouseMove(e) {
         if (!dragging) return;
         const vw = window.innerWidth;
-        const newWidth = ((vw - e.clientX) / vw) * 100;
-        panelWidth = Math.min(Math.max(newWidth, 4.5), 75);
+        const newWidth =  vw - e.clientX;
+        panelWidth = Math.min(Math.max(newWidth, 90), 1400);
     }
 
     function onMouseUp() {
         dragging = false;
         animated = true;
-        if (panelWidth < 30) {
-            panelWidth = 4.5;
+        if (panelWidth < 600) {
+            panelWidth = 90;
             mainPanelClosed = true;
         }
-        if (panelWidth > 60) {
-            panelWidth = 75;
+        if (panelWidth > 1100) {
+            panelWidth = 1400;
             mainPanelClosed = false;
         }
     }
 
     function homeBtnPressed() {
-        panelWidth = 75;
+        panelWidth = 1400;
         mainPanelClosed = false;
         scrollToSection(0);
     }
@@ -140,7 +145,7 @@
     "
 >
     <!-- Left info panel -->
-    <div class="w-[25%] h-full flex items-end pr-12 select-none relative translate-x-1">
+    <div class="w-110 h-full flex items-end pr-12 select-none relative translate-x-1 shrink-0">
         <div class="{mainPanelClosed ? 'opacity-0 z-20' : 'z-30'} absolute transition-all duration-300 w-full h-52 flex flex-col">
             <div class="w-full h-2/3 text-[40px] text-amber-50 font-serif font-[400px]">
                 <h1 class="[text-shadow:0px_4px_6px_rgba(0,0,0,0.9)]">
@@ -185,7 +190,7 @@
     <!-- Main panel -->
     <div
         bind:this={mainPanel}
-        style="width: {panelWidth}%"
+        style="width: {panelWidth}px"
         class="{animated ? 'transition-all duration-300' : ''} h-full backdrop-blur-[1px] bg-[#121924]/95 rounded-2xl drop-shadow-2xl border border-slate-700 p-6 flex pointer-events-auto relative"
     >
         <!-- Drag handle -->
